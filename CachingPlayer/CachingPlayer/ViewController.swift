@@ -9,12 +9,39 @@
 import UIKit
 import AVKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, AVAssetDownloadDelegate {
 
     @IBOutlet weak var playerView: UIView!
     @IBOutlet weak var progressLabel: UILabel!
 
-    var downloadSession: AVAssetDownloadURLSession?
+    var assetDownloadURLSession: AVAssetDownloadURLSession?
+
+    private var playerItemObserver: NSKeyValueObservation?
+
+    private var playerItem: AVPlayerItem? {
+        willSet {
+            /// Remove any previous KVO observer.
+            guard let playerItemObserver = playerItemObserver else { return }
+
+            playerItemObserver.invalidate()
+        }
+
+        didSet {
+            /// - Tag: PlayerItemReadyToPlay
+            playerItemObserver = playerItem?.observe(\AVPlayerItem.status, options: [.new, .initial]) { [weak self] (item, _) in
+                guard let strongSelf = self else { return }
+
+                if item.status == .readyToPlay {
+                    strongSelf.player = AVPlayer(playerItem: strongSelf.playerItem)
+                    strongSelf.player?.play()
+                } else if item.status == .failed {
+                    let error = item.error
+
+                    print("Error: \(String(describing: error?.localizedDescription))")
+                }
+            }
+        }
+    }
 
     var player: AVPlayer?
 
@@ -22,14 +49,15 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
 
-        manager.output = self
-
-        _ = manager.session(with: "test").stream(url: "https://playerservices.streamtheworld.com/api/livestream-redirect/WRJAFM_ADP.m3u8")
+        let asset = AVURLAsset(url: URL(string: "https://playerservices.streamtheworld.com/api/livestream-redirect/WRJAFM_ADP.m3u8")!)
+        AssetPersistenceManager.sharedManager.downloadStream(for: asset)
 
     }
 
+    @IBAction func stop(_ sender: Any) {
+        print("")
+    }
 }
 
 extension ViewController: StreamSessionManagerOutput {

@@ -39,9 +39,9 @@ class StreamSession: NSObject {
 
         let asset = AVURLAsset(url: streamURL)
         guard let downloadTask = downloadSession?.makeAssetDownloadTask(asset: asset,
-                                                                        assetTitle: identifier,
+                                                                        assetTitle: url,
                                                                         assetArtworkData: nil,
-                                                                        options: nil) else  { return nil }
+                                                                        options: nil) else { return nil }
         tasks[url] =  downloadTask
         downloadTask.resume()
 

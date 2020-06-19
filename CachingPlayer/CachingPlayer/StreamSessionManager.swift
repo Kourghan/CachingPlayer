@@ -50,6 +50,15 @@ class StreamSessionManager: NSObject {
 
 extension StreamSessionManager: AVAssetDownloadDelegate {
 
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        print(error)
+    }
+
+    @available(iOS 11.0, *)
+    func urlSession(_ session: URLSession, aggregateAssetDownloadTask: AVAggregateAssetDownloadTask, willDownloadTo location: URL) {
+        print(location)
+    }
+
     func urlSession(_ session: URLSession, assetDownloadTask: AVAssetDownloadTask, didLoad timeRange: CMTimeRange, totalTimeRangesLoaded loadedTimeRanges: [NSValue], timeRangeExpectedToLoad: CMTimeRange) {
         // Here you can calculate % of task downloaded
 
